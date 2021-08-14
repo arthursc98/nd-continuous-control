@@ -68,6 +68,7 @@ EPSILON_DECAY = 1e-6    # Decay Epsilon while training
 ## Experience Replay
 In order to try to solve rare events detection in our model, we store each experience from our agent in a memory and sample it randomly so our agent start to generalize better and recall rare occurrences. Also for better performance we could use mini-batch's to see how our model converge. The image below shows up how figuratively the memory would look.<br>
 ![SARS Memory][image5]
+For the current problem i used a `Buffer Size of 1.000.000 or 1e6` if you have some Python experience
 
 ## Ornstein-Uhlenbeck Process
 The Ornstein-Uhlenbeck process it's a stochastic process that envolves a modification random walk in continuous time, this process tends to converge to the mean function, which it's called mean-reverting, at first sight i never saw this before but it's really good since it's applied into continuous problems as like the one we are trying to solve<br>
@@ -106,6 +107,20 @@ class Actor(nn.Module, BaseModel):
 ...
 
 ```
+
+## Models Architetura
+The Actor and Critic models where builded up with FC layers with 512 and 256 with 3 layers where batch normalization acts between the first and the second layer on both models but we have different inputs, for the actor we input a state and for the Critic we have both, the state and the action but let me show you how both models is currently working
+```bash
+Actor:
+State -> FC 512 units -> Batch Normalization -> ReLU -> FC 256 units -> ReLU -> FC 4 units (Total Actions at this problem) -> TanH
+
+Critic:
+State -> FC 512 units -> Batch Normalization -> ReLU -> Concatenate w/ Action -> FC 256 units -> ReLU -> FC 256 units
+```
+Also to optimize the problem you will see that i used two Learning Rates which both right now is 1e-3 but while i was optimizing it i choose different learning rates to see if one of both networks would reach the local maximum faster ou slower. Also to prevent overfitting into our models i used a Batch Size with 256 of size to evaluate and train our neural network with mini batches.<br>
+When i was checking the benchmarking implementation section in Udacity they used a method that update the actor and critic networs 10 times after every 20 timesteps so i decided to try it out too, in `ddpg_agent.py` you will see `UPDATE_TIMESTEPS` and `UPDATE_NETWORK` where they represent this method.<br>
+Now for the last two parameters that i used the `TAU` and `GAMMA`, $\tau$ is used to soft update of target networks parameters and $\gamma$ is the discount factor for our rewards, so for a larger $\gamma$ we will care more about the distant rewards otherwise if we use a $\gamma$ like 0 we only care about the current reward, to solve this problem i used a $\tau$ with 1e-3(0.001) and $\gamma$ 0.99.<br>
+
 
 ## Model Performance
 Following all hyperparameters told before i builded the model and start to train it, for starting point i utilize Batch Normalization after each fully connected layer but it started takes too long to compute which for the time left to achieve the goal performance from the project would take a few hours computing it, so to deal with training time i used it after only the first fully connected layer that will try normalize and reduce overfitting in the first layer and voilà it takes much less time to compute and complete what the project challenge, so down below we can see the average and all performance metrics for our multiple agents<br>
