@@ -108,7 +108,7 @@ class Actor(nn.Module, BaseModel):
 
 ```
 
-## Models Architetura
+## Models Architeture
 The Actor and Critic models where builded up with FC layers with 512 and 256 with 3 layers where batch normalization acts between the first and the second layer on both models but we have different inputs, for the actor we input a state and for the Critic we have both, the state and the action but let me show you how both models is currently working
 ```bash
 Actor:
